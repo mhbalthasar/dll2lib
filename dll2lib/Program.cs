@@ -96,24 +96,27 @@ namespace dll2lib
         }
         static void Main(string[] args)
         {
-            string dllfile = args[0];
-            string outputdir = args[1];
-
-            if (File.Exists(dllfile))
+            if (args.Length > 0)
             {
-                if (!(outputdir.Length>3 && outputdir[1]==':' && outputdir[2]== '\\'))
+                string dllfile = args[0];
+
+                if (File.Exists(dllfile))
                 {
-                    outputdir = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),outputdir);
+                    string outputdir = args.Length>1 ? args[1]:"";
+                    if (!(outputdir.Length > 3 && outputdir[1] == ':' && outputdir[2] == '\\'))
+                    {
+                        outputdir = Path.Combine(Directory.GetCurrentDirectory(), outputdir);
+                    }
+                    if (!Directory.Exists(outputdir))
+                    {
+                        Directory.CreateDirectory(outputdir);
+                    }
+                    string fn = Path.GetFileNameWithoutExtension(dllfile);
+                    GenerateDef(dllfile, Path.Combine(outputdir, fn + ".def"));
+                    GenerateLib(Path.Combine(outputdir, fn + ".def"), Path.Combine(outputdir, fn + ".lib"));
+                    Console.WriteLine("DONE");
+                    return;
                 }
-                if(!Directory.Exists(outputdir))
-                {
-                    Directory.CreateDirectory(outputdir);
-                }
-                string fn = Path.GetFileNameWithoutExtension(dllfile);
-                GenerateDef(dllfile, Path.Combine(outputdir, fn + ".def"));
-                GenerateLib(Path.Combine(outputdir, fn + ".def"), Path.Combine(outputdir, fn + ".lib"));
-                Console.WriteLine("DONE");
-                return;
             }
 
             Console.WriteLine("dll2lib dllfile outputdir");
